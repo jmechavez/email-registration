@@ -23,6 +23,7 @@ func (uh *UserHandlers) GetAllUsersEmail(w http.ResponseWriter, r *http.Request)
 
 func writeResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Add("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow frontend
 	w.WriteHeader(code)
 
 	err := json.NewEncoder(w).Encode(data)
