@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users List</title>
+
+    <!-- Alpine.js for frontend logic -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <!-- htmx for AJAX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+
+    <script>
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("userList", () => ({
+                users: [],
+                error: "",
+
+                async fetchUsers() {
+                    try {
+                        const response = await fetch("http://localhost:8000/users");
+                        if (!response.ok) throw new Error("Failed to fetch users");
+
+                        this.users = await response.json();
+                    } catch (err) {
+                        this.error = "Error loading users: " + err.message;
+                    }
+                },
+            }));
+        });
+    </script>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Ensures borders collapse into a single border */
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid black; /* Sets a solid black border */
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body class="p-5 font-sans">
+    <h1 class="text-xl font-bold mb-4">User Emails</h1>
+
+    <div x-data="userList" x-init="fetchUsers()">
+        <template x-if="error">
+            <p class="text-red-500" x-text="error"></p>
+        </template>
+
+        <!-- htmx Button -->
+        <button 
+            hx-get="/users"
+            hx-target="#user-table-body"
+            hx-trigger="click"
+            class="px-4 py-2 bg-blue-500 text-white rounded mb-3">
+            Refresh Users
+        </button>
+
+        <!-- Users Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID No</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="user-table-body">
+                <template x-for="user in users" :key="user.id_no">
+                    <tr>
+                        <td x-text="user.id_no"></td>
+                        <td x-text="user.full_name"></td>
+                        <td x-text="user.email"></td>
+                        <td x-text="user.department"></td>
+                        <td x-text="user.status"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
