@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users List</title>
 
-    <!-- Alpine.js for frontend logic -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-    <!-- htmx for AJAX -->
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
         document.addEventListener("alpine:init", () => {
@@ -21,7 +19,6 @@
                     try {
                         const response = await fetch("http://localhost:8000/users");
                         if (!response.ok) throw new Error("Failed to fetch users");
-
                         this.users = await response.json();
                     } catch (err) {
                         this.error = "Error loading users: " + err.message;
@@ -30,64 +27,40 @@
             }));
         });
     </script>
-
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse; /* Ensures borders collapse into a single border */
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid black; /* Sets a solid black border */
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-    </style>
 </head>
-<body class="p-5 font-sans">
-    <h1 class="text-xl font-bold mb-4">User Emails</h1>
 
-    <div x-data="userList" x-init="fetchUsers()">
-        <template x-if="error">
-            <p class="text-red-500" x-text="error"></p>
-        </template>
+<body class="bg-[#272822] text-[#f8f8f2] p-5 font-mono">  <div class="container mx-auto">
+        <h1 class="text-3xl font-bold mb-4 text-left text-[#f8f8f2]">User Emails</h1>  <div x-data="userList" x-init="fetchUsers()">
+            <template x-if="error">
+                <p class="text-[#f92672] mb-4" x-text="error"></p>  </template>
 
-        <!-- htmx Button -->
-        <button 
-            hx-get="/users"
-            hx-target="#user-table-body"
-            hx-trigger="click"
-            class="px-4 py-2 bg-blue-500 text-white rounded mb-3">
-            Refresh Users
-        </button>
+            <button
+                hx-get="/users"
+                hx-target="#user-table-body"
+                hx-trigger="click"
+                class="px-4 py-1 bg-[#44463f] hover:bg-[#50524b] text-[#f8f8f2] font-bold rounded mb-3"  >
+                Refresh Users
+            </button>
 
-        <!-- Users Table -->
-        <table>
-            <thead>
-                <tr>
-                    <th>ID No</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="user-table-body">
-                <template x-for="user in users" :key="user.id_no">
-                    <tr>
-                        <td x-text="user.id_no"></td>
-                        <td x-text="user.full_name"></td>
-                        <td x-text="user.email"></td>
-                        <td x-text="user.department"></td>
-                        <td x-text="user.status"></td>
+            <table class="min-w-full border border-collapse shadow-md bg-[#3e4038]">  <thead class="bg-[#494b42]">  <tr>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#f8f8f2]">ID No</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#f8f8f2]">Full Name</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#f8f8f2]">Email</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#f8f8f2]">Department</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#f8f8f2]">Status</th>
                     </tr>
-                </template>
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="user-table-body" class="bg-[#383a33]">  <template x-for="user in users" :key="user.id_no">
+                        <tr class="border-b hover:bg-[#44463f]">  <td class="py-2 px-4 text-[#f8f8f2]" x-text="user.id_no"></td>
+                            <td class="py-2 px-4 text-[#f8f8f2]" x-text="user.full_name"></td>
+                            <td class="py-2 px-4 text-[#f8f8f2]" x-text="user.email"></td>
+                            <td class="py-2 px-4 text-[#f8f8f2]" x-text="user.department"></td>
+                             <td class="py-2 px-4" :class="{ 'text-[#28a745]': user.status === 'active', 'text-[#f92672]': user.status !== 'active' }" x-text="user.status"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
-
