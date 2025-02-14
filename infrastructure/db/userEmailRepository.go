@@ -5,6 +5,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/jmechavez/email-registration/errors"
+	"github.com/jmechavez/email-registration/infrastructure/logger"
 	"github.com/jmechavez/email-registration/internal/domain"
 )
 
@@ -23,6 +24,25 @@ func (r UserEmailRepoDb) FindAllUsers() ([]domain.User, *errors.AppError) {
 		return nil, errors.NewUnExpectedError("Unexpected database error")
 	}
 	return users, nil
+}
+
+func (r UserEmailRepoDb) CreateUserEmail(u domain.User) (*domain.User, *errors.AppError) {
+	insertUserSql := "INSERT INTO email_accounts (id_no, first_name, last_name, suffix, email_action,srs_no, department) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING register_no, email"
+	err := r.emailDb.QueryRow(
+		insertUserSql,
+		u.IdNo,
+		u.FirstName,
+		u.LastName,
+		u.Suffix,
+		u.EmailAction,
+		u.SrsNo,
+		u.Department,
+	).Scan(&u.RegisterNo, &u.Email)
+	if err != nil {
+		logger.Error("Error while creating account: " + err.Error())
+		return nil, errors.NewUnExpectedError("Unexpected Database Error")
+	}
+	return &u, nil
 }
 
 func NewUserRepoDb(userPostDb *sqlx.DB) UserEmailRepoDb {

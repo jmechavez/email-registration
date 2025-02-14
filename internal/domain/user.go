@@ -35,6 +35,14 @@ func (u User) ToDto() dto.UserEmailResponse {
 	}
 }
 
+func (u User) ToNewUserResponseDto() dto.NewUserEmailResponse {
+	return dto.NewUserEmailResponse{
+		RegisterNo: u.RegisterNo,
+		Email:      u.Email,
+	}
+}
+
 type UserRepo interface {
 	FindAllUsers() ([]User, *errors.AppError)
+	CreateUserEmail(User) (*User, *errors.AppError)
 }

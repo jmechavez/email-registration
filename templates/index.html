@@ -5,6 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users List</title>
 
+
+    <!-- JetBrains Mono font -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+     <!-- Alpine.js for client-side reactivity -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- htmx for making AJAX requests and updating elements -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config for JetBrains Mono -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'jetbrains': ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+ 
+    <script>
+        // Initialize Alpine.js component
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("userList", () => ({
+                users: [], // Stores user data
+                error: "", // Stores error messages
+                search: "", // Stores the search query
+                filteredUsers: [], // Stores the filtered user list
+                // Login state
+                isLoggedIn: false,
+
+                login() {
+                    this.isLoggedIn = true;
+                    this.fetchUsers();
+                },
+
+                logout() {
+                    this.isLoggedIn = false;
+                    this.users = [];
+                    this.filteredUsers = [];
+                },
+
     <!-- Alpine.js for frontend logic -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
@@ -22,11 +70,123 @@
                         const response = await fetch("http://localhost:8000/users");
                         if (!response.ok) throw new Error("Failed to fetch users");
 
+
                         this.users = await response.json();
+
                     } catch (err) {
                         this.error = "Error loading users: " + err.message;
                     }
                 },
+
+
+                filterUsers() {
+                    this.filteredUsers = this.users.filter(user => {
+                        const searchLower = this.search.toLowerCase();
+                        return (
+                            user.id_no.toString().toLowerCase().includes(searchLower) ||
+                            user.full_name.toLowerCase().includes(searchLower) ||
+                            user.email.toLowerCase().includes(searchLower) ||
+                            user.department.toLowerCase().includes(searchLower) ||
+                            user.status.toLowerCase().includes(searchLower)
+                        );
+                    });
+                },
+
+                // htmx callback after table refresh
+                afterRefresh() {
+                    this.filteredUsers = [...this.users]; // Sync filtered users after refresh
+                    this.filterUsers(); // Apply any current search
+                }
+            }));
+        });
+    </script>
+    <style>
+        h1:hover {
+            color: #ffcc00;
+            transition: color 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-[#272822] text-[#f8f8f2] p-5 font-jetbrains">
+    <div class="container mx-auto">
+        <!-- Header with title and login -->
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-3xl font-bold text-[#ffd967]">User Emails</h1>
+            
+            <!-- Simplified Login/Logout -->
+            <div x-data="userList" class="flex gap-4 items-center">
+                <template x-if="!isLoggedIn">
+                    <button 
+                        @click="login" 
+                        class="px-4 py-1 bg-[#44463f] hover:bg-[#50524b] text-[#ffd967] font-bold rounded"
+                    >
+                        Login
+                    </button>
+                </template>
+                <template x-if="isLoggedIn">
+                    <button 
+                        @click="logout" 
+                        class="px-4 py-1 bg-[#44463f] hover:bg-[#50524b] text-[#ffd967] font-bold rounded"
+                    >
+                        Logout
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div x-data="userList" x-init="fetchUsers()">
+            <template x-if="error">
+                <p class="text-[#fe6189] mb-4" x-text="error"></p>
+            </template>
+            <input type="text"
+                   x-model="search"
+                   @input="filterUsers"
+                   class="bg-[#44463f] text-[#ffd967] border border-[#50524b] rounded px-3 py-1 mb-3 w-full font-jetbrains"
+                   placeholder="Search users..." />
+
+            <button
+                hx-get="/users"
+                hx-target="#user-table-body"
+                hx-indicator="#loading"  
+                hx-swap="innerHTML" 
+                hx-callback="afterRefresh" 
+                class="px-4 py-1 bg-[#44463f] hover:bg-[#50524b] text-[#f8f8f2] font-bold rounded mb-3">
+                Refresh Users
+            </button>
+            <span id="loading" class="hidden">Loading...</span> 
+
+            <table class="min-w-full shadow-md bg-[#3e4038]">
+                <thead class="bg-[#494b42]">
+                    <tr>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#ffd967]">ID No</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#ffd967]">Full Name</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#ffd967]">Email</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#ffd967]">Department</th>
+                        <th class="py-2 px-4 text-left font-medium uppercase tracking-wider text-[#ffd967]">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body" class="bg-[#383a33]">
+                    <template x-for="user in filteredUsers" :key="user.id_no">
+                        <tr class="hover:bg-[#44463f]">
+                           <td class="py-2 px-4 text-[#f8f8f2]" x-text="user.id_no"></td>
+                            <td class="py-2 px-4 text-[#f8f8f2]" x-text="user.full_name"></td>
+                            <td class="py-2 px-4 text-[#79dce9]" x-text="user.email"></td>
+                            <td class="py-2 px-4 text-[#f8f8f2]" x-text="user.department"></td>
+                            <td class="py-2 px-4" :class="{ 'text-[#a9dd77]': user.status === 'active', 'text-[#fe6189]': user.status !== 'active' }" x-text="user.status"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+     <!-- Footer with copyright -->
+    <div class="fixed bottom-0 left-1/2 transform -translate-x-1/2 p-4 text-[#ffd967] text-sm bg-[#272822] rounded-t">
+        2025 JM. All Rights Reserved.
+    </div>
+</body>
+</html>
+
             }));
         });
     </script>

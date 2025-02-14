@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
+	"github.com/jmechavez/email-registration/internal/dto"
 	"github.com/jmechavez/email-registration/internal/ports/service"
 )
 
@@ -21,9 +24,29 @@ func (uh *UserHandlers) GetAllUsersEmail(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+func (uh *UserHandlers) NewUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idNo := vars["id_no"]
+	var request dto.NewUserEmailRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, err.Error())
+	} else {
+		request.IdNo = idNo
+		user, appError := uh.service.NewUser(request)
+		if appError != nil {
+			writeResponse(w, appError.Code, appError.Message)
+		} else {
+			writeResponse(w, http.StatusCreated, user)
+		}
+	}
+}
+
 func writeResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow frontend
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(code)
 
 	err := json.NewEncoder(w).Encode(data)
