@@ -16,4 +16,5 @@ type UserEmailResponse struct {
 
 type NewUserEmailResponse struct {
 	RegisterNo string `json:"register_no"`
+	Email      string `json:"email"`
 }
