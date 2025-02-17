@@ -1,66 +1,144 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"></script>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTMX Dynamic API Form</title>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"
+    ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js"></script>
     <style>
-        .container {
-            padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .form-input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-top: 5px;
-        }
-        .readonly-input {
-            background-color: #f5f5f5;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+      .container {
+        padding: 20px;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+      .input-group {
+        margin-bottom: 15px;
+      }
+      .form-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-top: 5px;
+      }
+      .readonly-input {
+        background-color: #f5f5f5;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
     </style>
-</head>
-<body>
-    <div class="container" 
-         x-data="{ 
-            url: 'http://localhost:8000/users//user',
-            updateNumber(newNum) {
-                if (newNum === '') {
-                    this.url = 'http://localhost:8000/users//user';
-                } else {
-                    this.url = `http://localhost:8000/users/${newNum}/user`;
-                }
-            }
-         }"
-         hx-trigger="input changed"
-         hx-swap="innerHTML">
-        
+  </head>
+  <body>
+    <div
+      class="container"
+      x-data="{ 
+        idno: '',
+        firstname: '',
+        lastname: '',
+        suffix: '',
+        department: '',
+        srs_no: '',
+        email_action: 'save',
+        getUrl() {
+            return this.idno?.trim() 
+                ? `http://localhost:8000/users/${this.idno}/user` 
+                : 'http://localhost:8000/users/user';
+        }
+    }"
+    >
+      <div class="input-group">
+        <label for="currentUrl">Current API URL:</label>
+        <input
+          type="text"
+          id="currentUrl"
+          class="form-input readonly-input"
+          x-bind:value="getUrl()"
+          readonly
+        />
+      </div>
+      <div class="input-group">
+        <label for="idno">Enter User Number:</label>
+        <input
+          type="number"
+          id="idno"
+          class="form-input"
+          x-model="idno"
+          placeholder="Enter number"
+        />
+      </div>
+      <!-- Form for POST request -->
+      <form
+        x-bind:hx-post="getUrl()"
+        hx-trigger="submit"
+        hx-swap="none"
+        hx-target="#responseMessage"
+      >
         <div class="input-group">
-            <label for="currentUrl">Current URL:</label>
-            <input type="text" 
-                   id="currentUrl" 
-                   class="form-input readonly-input" 
-                   x-model="url" 
-                   readonly>
+          <label for="firstname">First Name:</label>
+          <input
+            type="text"
+            id="firstname"
+            class="form-input"
+            x-model="firstname"
+            required
+          />
         </div>
-        
         <div class="input-group">
-            <label for="newNumber">Enter new user number:</label>
-            <input type="number" 
-                   id="newNumber" 
-                   class="form-input"
-                   x-on:input="updateNumber($event.target.value)"
-                   placeholder="Enter number">
+          <label for="lastname">Last Name:</label>
+          <input
+            type="text"
+            id="lastname"
+            class="form-input"
+            x-model="lastname"
+            required
+          />
         </div>
+        <div class="input-group">
+          <label for="suffix">Suffix:</label>
+          <input type="text" id="suffix" class="form-input" x-model="suffix" />
+        </div>
+        <div class="input-group">
+          <label for="department">Department:</label>
+          <input
+            type="text"
+            id="department"
+            class="form-input"
+            x-model="department"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <label for="srs_no">SRS No:</label>
+          <input
+            type="text"
+            id="srs_no"
+            class="form-input"
+            x-model="srs_no"
+            required
+          />
+        </div>
+        <input type="hidden" id="email_action" x-model="email_action" />
+        <button type="submit">Submit</button>
+      </form>
+      <div id="responseMessage"></div>
     </div>
-</body>
+  </body>
 </html>
