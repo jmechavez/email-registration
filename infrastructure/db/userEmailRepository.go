@@ -27,7 +27,7 @@ func (r UserEmailRepoDb) FindAllUsers() ([]domain.User, *errors.AppError) {
 }
 
 func (r UserEmailRepoDb) CreateUserEmail(u domain.User) (*domain.User, *errors.AppError) {
-	insertUserSql := "INSERT INTO email_accounts (id_no, first_name, last_name, suffix, email_action,srs_no, department) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING register_no, email"
+	insertUserSql := "INSERT INTO email_accounts (id_no, first_name, last_name, suffix, email_action, srs_no, department) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING register_no, email"
 	err := r.emailDb.QueryRow(
 		insertUserSql,
 		u.IdNo,
