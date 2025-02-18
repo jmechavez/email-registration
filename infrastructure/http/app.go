@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 
@@ -23,7 +24,22 @@ func Start() {
 	router.HandleFunc("/users", uh.GetAllUsersEmail).Methods(http.MethodGet)
 	router.HandleFunc("/users/{id_no}/user", uh.NewUser).Methods(http.MethodPost)
 
-	log.Fatal(http.ListenAndServe("localhost:8000", router))
+	// Set CORS options
+	corsHandler := handlers.CORS(
+		handlers.AllowedOrigins([]string{"*"}), // Change this to specific origins if needed
+		handlers.AllowedMethods(
+			[]string{
+				http.MethodGet,
+				http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+				http.MethodOptions,
+			},
+		),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+	)
+
+	log.Fatal(http.ListenAndServe("localhost:8000", corsHandler(router)))
 }
 
 func getDbUser() *sqlx.DB {
