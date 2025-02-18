@@ -3,12 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTMX Dynamic API Form</title>
+    <title>Create User Form</title>
     <script
       defer
       src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"
     ></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js"></script>
     <style>
       .container {
         padding: 20px;
@@ -44,6 +43,10 @@
       button:hover {
         background-color: #0056b3;
       }
+      .error-message {
+        color: red;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -57,40 +60,63 @@
         department: '',
         srs_no: '',
         email_action: 'save',
-        getUrl() {
-            return this.idno?.trim() 
-                ? `http://localhost:8000/users/${this.idno}/user` 
-                : 'http://localhost:8000/users/user';
+        errorMessage: '',
+        isLoading: false,
+        async submitForm() {
+          if (!this.idno) {
+            this.errorMessage = 'Please enter an ID number';
+            return;
+          }
+          this.isLoading = true;
+          this.errorMessage = '';
+
+          const url = `http://localhost:8000/users/${this.idno}/user`;
+          const data = {
+            firstname: this.firstname,
+            lastname: this.lastname,
+            suffix: this.suffix,
+            department: this.department,
+            srs_no: this.srs_no,
+            email_action: this.email_action,
+          };
+
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            console.log('Success:', result);
+            alert('User created successfully!');
+          } catch (error) {
+            console.error('Error:', error);
+            this.errorMessage = 'Failed to create user. Please try again.';
+          } finally {
+            this.isLoading = false;
+          }
         }
-    }"
+      }"
     >
       <div class="input-group">
-        <label for="currentUrl">Current API URL:</label>
+        <label for="idno">ID Number:</label>
         <input
           type="text"
-          id="currentUrl"
-          class="form-input readonly-input"
-          x-bind:value="getUrl()"
-          readonly
-        />
-      </div>
-      <div class="input-group">
-        <label for="idno">Enter User Number:</label>
-        <input
-          type="number"
           id="idno"
           class="form-input"
           x-model="idno"
-          placeholder="Enter number"
+          required
         />
       </div>
-      <!-- Form for POST request -->
-      <form
-        x-bind:hx-post="getUrl()"
-        hx-trigger="submit"
-        hx-swap="none"
-        hx-target="#responseMessage"
-      >
+
+      <form @submit.prevent="submitForm">
         <div class="input-group">
           <label for="firstname">First Name:</label>
           <input
@@ -135,10 +161,12 @@
             required
           />
         </div>
-        <input type="hidden" id="email_action" x-model="email_action" />
-        <button type="submit">Submit</button>
+        <button type="submit" :disabled="isLoading">
+          <span x-show="!isLoading">Create User</span>
+          <span x-show="isLoading">Creating...</span>
+        </button>
       </form>
-      <div id="responseMessage"></div>
+      <div x-show="errorMessage" x-text="errorMessage" class="error-message"></div>
     </div>
   </body>
 </html>
