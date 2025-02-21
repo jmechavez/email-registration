@@ -45,4 +45,5 @@ func (u User) ToNewUserResponseDto() dto.NewUserEmailResponse {
 type UserRepo interface {
 	FindAllUsers() ([]User, *errors.AppError)
 	CreateUserEmail(User) (*User, *errors.AppError)
+	// DeleteUserEmail(idNo User) *errors.AppError
 }

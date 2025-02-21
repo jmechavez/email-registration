@@ -11,8 +11,21 @@ type UserService interface {
 	NewUser(dto.NewUserEmailRequest) (*dto.NewUserEmailResponse, *errors.AppError)
 }
 
+type DefaultDelUserService struct {
+	repo domain.DelUser
+}
+
 type DefaultUserService struct {
 	repo domain.UserRepo
+}
+
+func (r DefaultDelUserService) DelUser(
+	req dto.DeleteUserEmailRequest,
+) (*dto.DeleteUserEmailResponse, *errors.AppError) {
+	err := req.Validate()
+	if err != nil {
+		return nil, err
+	}
 }
 
 func (r DefaultUserService) GetAllUserEmails() ([]dto.UserEmailResponse, *errors.AppError) {

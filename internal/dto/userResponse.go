@@ -18,3 +18,12 @@ type NewUserEmailResponse struct {
 	RegisterNo string `json:"register_no"`
 	Email      string `json:"email"`
 }
+
+type DeleteUserEmailResponse struct {
+	IdNo       string `json:"id_no"`
+	FirstName  string `json:"first_name,omitempty"`
+	LastName   string `json:"last_name,omitempty"`
+	Suffix     string `json:"suffix,omitempty"`
+	FullName   string `json:"full_name"`
+	Department string `json:"department"`
+}
