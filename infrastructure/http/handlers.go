@@ -15,6 +15,10 @@ type UserHandlers struct {
 	service service.UserService
 }
 
+type DelUserHandlers struct {
+	service service.DelUserService
+}
+
 func (uh *UserHandlers) GetAllUsersEmail(w http.ResponseWriter, r *http.Request) {
 	users, err := uh.service.GetAllUserEmails()
 	if err != nil {
@@ -40,6 +44,24 @@ func (uh *UserHandlers) NewUser(w http.ResponseWriter, r *http.Request) {
 			writeResponse(w, http.StatusCreated, user)
 		}
 	}
+}
+
+func (uh *DelUserHandlers) DelUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idNo := vars["id_no"]
+	var request dto.DeleteUserEmailRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		writeResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	request.IdNo = idNo
+	user, appError := uh.service.DelUser(request)
+	if appError != nil {
+		writeResponse(w, appError.Code, appError.Message)
+		return
+	}
+	writeResponse(w, http.StatusCreated, user)
 }
 
 func writeResponse(w http.ResponseWriter, code int, data interface{}) {
