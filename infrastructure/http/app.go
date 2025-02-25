@@ -16,13 +16,19 @@ func Start() {
 	router := mux.NewRouter()
 
 	dbUser := getDbUser()
+
 	userRepositoryDb := db.NewUserRepoDb(dbUser)
+	delUserRepositoryDb := db.DelUserRepoDb(dbUser)
 	uh := UserHandlers{
 		service.NewUserService(userRepositoryDb),
+	}
+	duh := DelUserHandlers{
+		service.NewDelUserService(delUserRepositoryDb),
 	}
 
 	router.HandleFunc("/users", uh.GetAllUsersEmail).Methods(http.MethodGet)
 	router.HandleFunc("/users/{id_no}/user", uh.NewUser).Methods(http.MethodPost)
+	router.HandleFunc("/users/{id_no}/user", duh.DelUser).Methods(http.MethodDelete)
 
 	// Set CORS options
 	corsHandler := handlers.CORS(

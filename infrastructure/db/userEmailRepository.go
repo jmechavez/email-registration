@@ -1,3 +1,5 @@
+package db
+
 import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -40,23 +42,7 @@ func (r UserEmailRepoDb) CreateUserEmail(u domain.User) (*domain.User, *errors.A
 	return &u, nil
 }
 
-// DeleteUserEmail removes a user email record from the database by ID.
-func (r UserEmailRepoDb) DeleteUserEmail(idNo string) *errors.AppError {
-	deleteUserSql := "DELETE FROM email_accounts WHERE id_no = $1"
-	result, err := r.emailDb.Exec(deleteUserSql, idNo)
-	if err != nil {
-		logger.Error("Error while deleting user: " + err.Error())
-		return errors.NewUnExpectedError("Unexpected Database Error")
-	}
-	rowsAffected, _ := result.RowsAffected()
-	if rowsAffected == 0 {
-		return errors.NewNotFoundError("User not found")
-	}
-	return nil
-}
-
 // NewUserRepoDb initializes the UserEmailRepoDb repository.
 func NewUserRepoDb(userPostDb *sqlx.DB) UserEmailRepoDb {
 	return UserEmailRepoDb{userPostDb}
 }
-
