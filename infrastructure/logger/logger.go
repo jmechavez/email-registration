@@ -24,5 +24,5 @@ func Info(message string, fields ...zap.Field) {
 }
 
 func Error(message string, fields ...zap.Field) {
-	log.Info(message, fields...)
+	log.Error(message, fields...)
 }

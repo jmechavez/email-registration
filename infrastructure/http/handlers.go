@@ -2,11 +2,11 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 
+	"github.com/jmechavez/email-registration/infrastructure/logger"
 	"github.com/jmechavez/email-registration/internal/dto"
 	"github.com/jmechavez/email-registration/internal/ports/service"
 )
@@ -17,6 +17,34 @@ type UserHandlers struct {
 
 type DelUserHandlers struct {
 	service service.DelUserService
+}
+
+func (uh *UserHandlers) GetUserIdNo(w http.ResponseWriter, r *http.Request) {
+	// Check for both parameter names
+	idNo := r.URL.Query().Get("id_no")
+	if idNo == "" {
+		// If id_no parameter is empty, try the idno parameter
+		idNo = r.URL.Query().Get("id_no")
+	}
+
+	// Validate the ID
+	if idNo == "" {
+		writeResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]string{"error": "Missing ID number parameter"},
+		)
+		return
+	}
+
+	// Get the user
+	user, err := uh.service.GetUserByIdNo(idNo)
+	if err != nil {
+		writeResponse(w, err.Code, err.AsMessage())
+		return
+	}
+
+	writeResponse(w, http.StatusOK, user)
 }
 
 func (uh *UserHandlers) GetAllUsersEmail(w http.ResponseWriter, r *http.Request) {
@@ -71,8 +99,7 @@ func writeResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(code)
 
-	err := json.NewEncoder(w).Encode(data)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to encode response %v", err))
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		logger.Error("Error encoding response: " + err.Error())
 	}
 }

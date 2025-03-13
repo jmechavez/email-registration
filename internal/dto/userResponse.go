@@ -27,3 +27,16 @@ type DeleteUserEmailResponse struct {
 	FullName   string `json:"full_name"`
 	Department string `json:"department"`
 }
+
+type ByIdNoUserEmailResponse struct {
+	IdNo        string `json:"id_no"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Suffix      string `json:"suffix"`
+	Department  string `json:"department"`
+	Email       string `json:"email"`
+	SrsNo       string `json:"srs_no"`
+	EmailAction string `json:"email_action"`
+	DateCreated string `json:"date_created"`
+	DateDeleted string `json:"deleted_at"`
+}

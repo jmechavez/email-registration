@@ -29,14 +29,14 @@ func (r DelUserEmailRepoDb) DeleteUserEmail(
 		)
 		DELETE FROM email_accounts
 		WHERE id_no IN (SELECT id_no FROM moved)
-		RETURNING 
-			id_no, 
+		RETURNING
+			id_no,
 			department,
-			first_name, 
-			last_name, 
-			COALESCE(NULLIF(suffix, ''), 'None') AS suffix, 
+			first_name,
+			last_name,
+			COALESCE(NULLIF(suffix, ''), 'None') AS suffix,
 			TRIM(
-				COALESCE(first_name, '') || ' ' || COALESCE(last_name, '') || 
+				COALESCE(first_name, '') || ' ' || COALESCE(last_name, '') ||
 				CASE WHEN suffix IS NOT NULL AND suffix != '' THEN ' ' || suffix ELSE '' END
 			) AS full_name;
 	`
