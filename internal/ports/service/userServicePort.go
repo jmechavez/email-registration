@@ -9,6 +9,7 @@ import (
 type UserService interface {
 	GetAllUserEmails() ([]dto.UserEmailResponse, *errors.AppError)
 	NewUser(dto.NewUserEmailRequest) (*dto.NewUserEmailResponse, *errors.AppError)
+	GetUserByIdNo(idNo string) (*dto.ByIdNoUserEmailResponse, *errors.AppError)
 }
 
 type DelUserService interface {
@@ -23,16 +24,28 @@ type DefaultUserService struct {
 	repo domain.UserRepo
 }
 
-func (r DefaultDelUserService) DelUser(
-	req dto.DeleteUserEmailRequest,
-) (*dto.DeleteUserEmailResponse, *errors.AppError) {
+func (r DefaultUserService) GetUserByIdNo(idNo string) (*dto.ByIdNoUserEmailResponse, *errors.AppError) {
+	if idNo == "" {
+		return nil, errors.NewValidationError("Id number cannot be empty")
+	}
+
+	user, err := r.repo.IdNo(idNo)
+	if err != nil {
+		return nil, err
+	}
+
+	response := user.ByIdNoUserEmailResponse()
+	return &response, nil
+}
+
+func (r DefaultDelUserService) DelUser(req dto.DeleteUserEmailRequest) (*dto.DeleteUserEmailResponse, *errors.AppError) {
 	err := req.Validate()
 	if err != nil {
 		return nil, err
 	}
 	delUser := domain.DelUser{
 		IdNo:        req.IdNo,
-		EmailAction: "delete",
+		EmailAction: "deleted",
 		SrsNo:       req.SrsNo,
 	}
 	deletedUser, err := r.repo.DeleteUserEmail(delUser)
@@ -57,9 +70,7 @@ func (r DefaultUserService) GetAllUserEmails() ([]dto.UserEmailResponse, *errors
 	return uResponse, nil
 }
 
-func (r DefaultUserService) NewUser(
-	req dto.NewUserEmailRequest,
-) (*dto.NewUserEmailResponse, *errors.AppError) {
+func (r DefaultUserService) NewUser(req dto.NewUserEmailRequest) (*dto.NewUserEmailResponse, *errors.AppError) {
 	err := req.Validate()
 	if err != nil {
 		return nil, err

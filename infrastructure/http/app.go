@@ -26,7 +26,8 @@ func Start() {
 		service.NewDelUserService(delUserRepositoryDb),
 	}
 
-	router.HandleFunc("/users", uh.GetAllUsersEmail).Methods(http.MethodGet)
+	//router.HandleFunc("/users", uh.GetAllUsersEmail).Methods(http.MethodGet)
+	router.HandleFunc("/users", uh.GetUserIdNo).Methods(http.MethodGet)
 	router.HandleFunc("/users/{id_no}/user", uh.NewUser).Methods(http.MethodPost)
 	router.HandleFunc("/users/{id_no}/user", duh.DelUser).Methods(http.MethodDelete)
 

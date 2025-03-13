@@ -17,6 +17,23 @@ type User struct {
 	Status      string `json:"status"       db:"status"`
 	EmailAction string `json:"email_action" db:"email_action"`
 	SrsNo       string `json:"srs_no"       db:"srs_no"`
+	DateCreated string `json:"date_created" db:"date_created"`
+	DateDeleted string `json:"deleted_at"   db:"deleted_at"`
+}
+
+func (u *User) ByIdNoUserEmailResponse() dto.ByIdNoUserEmailResponse {
+	return dto.ByIdNoUserEmailResponse{
+		IdNo:        u.IdNo,
+		FirstName:   u.FirstName,
+		LastName:    u.LastName,
+		Suffix:      u.Suffix,
+		Department:  u.Department,
+		Email:       u.Email,
+		EmailAction: u.EmailAction,
+		SrsNo:       u.SrsNo,
+		DateCreated: u.DateCreated,
+		DateDeleted: u.DateDeleted,
+	}
 }
 
 func (u User) ToDto() dto.UserEmailResponse {
@@ -45,4 +62,5 @@ func (u User) ToNewUserResponseDto() dto.NewUserEmailResponse {
 type UserRepo interface {
 	FindAllUsers() ([]User, *errors.AppError)
 	CreateUserEmail(User) (*User, *errors.AppError)
+	IdNo(string) (*User, *errors.AppError)
 }
