@@ -20,41 +20,40 @@ type DelUserHandlers struct {
 }
 
 func (uh *UserHandlers) GetUserIdNo(w http.ResponseWriter, r *http.Request) {
-	// Check for both parameter names
+	// Check if an ID number is provided
 	idNo := r.URL.Query().Get("id_no")
 	if idNo == "" {
-		// If id_no parameter is empty, try the idno parameter
-		idNo = r.URL.Query().Get("id_no")
+		idNo = r.URL.Query().Get("idno") // Allow both "id_no" and "idno"
 	}
 
-	// Validate the ID
-	if idNo == "" {
-		writeResponse(
-			w,
-			http.StatusBadRequest,
-			map[string]string{"error": "Missing ID number parameter"},
-		)
+	if idNo != "" {
+		// If an ID number is provided, fetch a specific user
+		user, err := uh.service.GetUserByIdNo(idNo)
+		if err != nil {
+			writeResponse(w, err.Code, err.AsMessage())
+			return
+		}
+		writeResponse(w, http.StatusOK, user)
 		return
 	}
 
-	// Get the user
-	user, err := uh.service.GetUserByIdNo(idNo)
-	if err != nil {
-		writeResponse(w, err.Code, err.AsMessage())
-		return
-	}
-
-	writeResponse(w, http.StatusOK, user)
-}
-
-func (uh *UserHandlers) GetAllUsersEmail(w http.ResponseWriter, r *http.Request) {
+	// If no ID number is provided, fetch all users' emails
 	users, err := uh.service.GetAllUserEmails()
 	if err != nil {
 		writeResponse(w, err.Code, err.AsMessage())
-	} else {
-		writeResponse(w, http.StatusOK, users)
+		return
 	}
+	writeResponse(w, http.StatusOK, users)
 }
+
+// func (uh *UserHandlers) GetAllUsersEmail(w http.ResponseWriter, r *http.Request) {
+// 	users, err := uh.service.GetAllUserEmails()
+// 	if err != nil {
+// 		writeResponse(w, err.Code, err.AsMessage())
+// 	} else {
+// 		writeResponse(w, http.StatusOK, users)
+// 	}
+// }
 
 func (uh *UserHandlers) NewUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
